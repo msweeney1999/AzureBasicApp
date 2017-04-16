@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace AzzureBasicApp.Controllers
 
             table.CreateIfNotExists();
 
+            
+
             var customer = new Customer(Guid.NewGuid())
             {
                 First = "dave",
@@ -33,6 +36,15 @@ namespace AzzureBasicApp.Controllers
 
             var insert = TableOperation.Insert(customer);
             table.Execute(insert);
+
+            var queueClient = sa.CreateCloudQueueClient();
+            var queue = queueClient.GetQueueReference("customerqueue");
+            var msg = new CloudQueueMessage(customer.RowKey);
+            queue.CreateIfNotExists();
+            queue.AddMessage(msg);
+            
+
+            
             return View(customer);
 
         }
